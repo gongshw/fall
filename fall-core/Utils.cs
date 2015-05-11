@@ -25,8 +25,15 @@ namespace fall_core
 
         public static string GetFileNameFromUri(string remoteUrl)
         {
-            Uri uri = new Uri(remoteUrl);
-            return System.IO.Path.GetFileName(uri.LocalPath);
+            Uri uri;
+            if (Uri.TryCreate(remoteUrl, UriKind.Absolute, out uri))
+            {
+                return System.IO.Path.GetFileName(uri.LocalPath);
+            }
+            else
+            {
+                return "";
+            }
         }
 
         public static string FormatSize(long byteSize)

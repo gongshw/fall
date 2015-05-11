@@ -145,14 +145,7 @@ namespace fall_core
                     this.running = true;
                 }
             }
-            try
-            {
-                this.fileOutStream = File.Open(this.GetLocalFile(), FileMode.Open);
-            }
-            catch (IOException e)
-            {
-                //TODO throw new exception to upper layer
-            }
+            this.fileOutStream = File.Open(this.GetLocalFile(), FileMode.Open);
             List<Thread> threads = new List<Thread>();
             int threadCount = Math.Min((int)blockInfo.count, Utils.GetIntConfig("MaxThreadNum", 5));
             for (int i = 0; i < threadCount; i++)

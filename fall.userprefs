@@ -1,0 +1,28 @@
+﻿<Properties StartupItem="fall-console/fall-console.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="fall-gui/App.config">
+    <Files>
+      <File FileName="fall-gui/App.config" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.fall-console>
+    <MonoDevelop.Ide.CustomExecutionModes>
+      <Data Name="默认 (Custom)" Id="7d9fa980-5a8f-4923-aa4c-e4f080fbc8fd" ModeId="Default">
+        <CommandData>
+          <Item Key="MonoDevelop.Ide.Execution.CustomArgsCustomizer">
+            <Value Arguments="http://download.xamarin.com/studio/Mac/XamarinStudio-5.9.0.431-0.dmg" WorkingDirectory="/Users/gongshw/Downloads" ctype="CustomArgsExecutionModeData">
+              <EnvironmentVariables />
+            </Value>
+          </Item>
+          <Item Key="MonoDevelop.Ide.Execution.MonoExecutionCustomizer">
+            <Value ctype="MonoExecutionParameters" />
+          </Item>
+        </CommandData>
+      </Data>
+    </MonoDevelop.Ide.CustomExecutionModes>
+  </MonoDevelop.Ide.ItemProperties.fall-console>
+</Properties>

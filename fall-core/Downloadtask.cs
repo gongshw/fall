@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Reflection;
+using System.Runtime.Remoting.Messaging;
+using System.Runtime.Remoting.Proxies;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace fall_core
@@ -27,14 +32,14 @@ namespace fall_core
 
     public interface TaskListener
     {
-        void OnException(DownloadTask task, Exception exception);
+        void OnError(DownloadTask task, DownloadError exception);
         void OnDone(DownloadTask task);
         void OnProcessUpdate(DownloadTask task);
     }
 
     public class EmptyTaskListener : TaskListener
     {
-        public void OnException(DownloadTask task, Exception exception) { }
+        public void OnError(DownloadTask task, DownloadError exception) { }
         public void OnDone(DownloadTask task) { }
         public void OnProcessUpdate(DownloadTask task) { }
     }
@@ -85,14 +90,12 @@ namespace fall_core
             this.listener.OnDone(this);
         }
 
-        protected void NotifyException(Exception e)
+        protected void NotifyError(DownloadError e)
         {
-            this.listener.OnException(this, e);
+            this.listener.OnError(this, e);
         }
 
-
         public double Speed { get { return speedSamper.getSpeedIn(50000); } }
-
 
         abstract public String GetProtocol();
         abstract public double GetProcess();
@@ -105,17 +108,100 @@ namespace fall_core
         abstract public long TotalSize { get; }
     }
 
-    public class DownloadTaskFactory
+    public class DownloadTaskAnalyzer
     {
+
+        public DownloadTask create(FileLink link, String localFilePath)
+        {
+            return create(link.Link, localFilePath);
+        }
+
         public DownloadTask create(String remoteUrl, String localFilePath)
         {
             if (remoteUrl.StartsWith("http://"))
             {
                 DownloadTask task = new MultiThreadHttpTask();
                 task.Create(remoteUrl, localFilePath);
-                return task;
+                return DownloadTaskProxy.Create(task);
             }
             return null;
         }
+    }
+
+    public class FileLink
+    {
+
+        private string _link;
+
+        private string _name;
+
+        public FileLink(string link)
+        {
+            this._link = link;
+            this._name = Utils.GetFileNameFromUri(link);
+            if (_link.StartsWith("http://"))
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(link);
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                string fileDes = response.Headers.Get("content-disposition");
+                if (null != fileDes)
+                {
+                    string pattern = @"attachment; filename=(.+)";
+                    MatchCollection matches = Regex.Matches(fileDes, pattern, RegexOptions.IgnoreCase);
+                    if (matches.Count == 1)
+                    {
+                        this._name = matches[0].Groups[1].Value;
+                    }
+                }
+                response.Close();
+            }
+        }
+
+        public string FileName { get { return this._name; } }
+
+        public string Link { get { return this._link; } }
+    }
+
+    public class DownloadTaskProxy : RealProxy
+    {
+        private DownloadTask proxy;
+        private TaskListener listener = new EmptyTaskListener();
+        private DownloadTaskProxy(DownloadTask instance)
+            : base(typeof(DownloadTask))
+        {
+            proxy = instance;
+        }
+
+        public static DownloadTask Create(DownloadTask instance)
+        {
+            return (DownloadTask)new DownloadTaskProxy(instance).GetTransparentProxy();
+        }
+
+        public override IMessage Invoke(IMessage msg)
+        {
+            var methodCall = (IMethodCallMessage)msg;
+            var method = (MethodInfo)methodCall.MethodBase;
+
+            try
+            {
+                if (method.Name.Equals("BindTaskListener") && methodCall.ArgCount == 1 && (methodCall.Args[0] is TaskListener))
+                {
+                    listener = (TaskListener)methodCall.Args[0];
+                }
+                var result = method.Invoke(proxy, methodCall.InArgs);
+                return new ReturnMessage(result, null, 0, methodCall.LogicalCallContext, methodCall);
+            }
+            catch (Exception e)
+            {
+                if (e is TargetInvocationException && e.InnerException != null)
+                {
+                    listener.OnError(DownloadTaskProxy.Create(proxy), new DownloadError(e.InnerException.Message, e.InnerException));
+                    return new ReturnMessage(null, null, 0, methodCall.LogicalCallContext, methodCall);
+                }
+
+                return new ReturnMessage(e, msg as IMethodCallMessage);
+            }
+        }
+
     }
 }

@@ -21,7 +21,7 @@ namespace fall_console
             {
                 String remoteUrl = args[0];
                 String localFilePath = Utils.GetFileNameFromUri(remoteUrl);
-                DownloadTaskFactory factory = new DownloadTaskFactory();
+                DownloadTaskAnalyzer factory = new DownloadTaskAnalyzer();
                 DownloadTask task = factory.create(remoteUrl, localFilePath);
                 if (task != null)
                 {
@@ -43,7 +43,7 @@ namespace fall_console
 
         private ConsoleUI ui = ConsoleUI.GetInstance();
 
-        public void OnException(DownloadTask task, Exception exception)
+        public void OnError(DownloadTask task, DownloadError exception)
         {
             Console.Error.WriteLine("Job Error - {0}!", exception.Message);
         }
