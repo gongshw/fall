@@ -123,13 +123,16 @@ namespace fall_core
 
         public DownloadTask create(String remoteUrl, String localFilePath)
         {
-            if (remoteUrl.StartsWith("http://"))
+            if (remoteUrl.StartsWith("http://") || remoteUrl.StartsWith("https://"))
             {
                 DownloadTask task = new MultiThreadHttpTask();
                 task.Create(remoteUrl, localFilePath);
                 return DownloadTaskProxy.Create(task);
             }
-            return null;
+            else
+            {
+                return null;
+            }
         }
     }
 
@@ -144,7 +147,7 @@ namespace fall_core
         {
             this._link = link;
             this._name = Utils.GetFileNameFromUri(link);
-            if (_link.StartsWith("http://"))
+            if (_link.StartsWith("http://") || _link.StartsWith("https://"))
             {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(link);
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
