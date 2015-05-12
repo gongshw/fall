@@ -148,7 +148,7 @@ namespace fall_core
                     this.running = true;
                 }
             }
-            this.fileOutStream = File.Open(this.GetLocalFile(), FileMode.Open);
+            this.fileOutStream = File.Open(this.LocalFile, FileMode.Open);
             List<Thread> threads = new List<Thread>();
             int threadCount = Math.Min((int)blockInfo.count, Utils.GetIntConfig("MaxThreadNum", 5));
             for (int i = 0; i < threadCount; i++)
@@ -198,7 +198,7 @@ namespace fall_core
                 maxBlockSize = this.maxBlockSize;
             }
             TaskBlock[] blocks = new TaskBlock[blockInfo.count];
-            fileOutStream = new FileStream(GetLocalFile(), FileMode.Create, FileAccess.Write, FileShare.Read);
+            fileOutStream = new FileStream(this.LocalFile, FileMode.Create, FileAccess.Write, FileShare.Read);
             for (int i = 0; i < blocks.Length; i++)
             {
                 blocks[i] = new TaskBlock();
@@ -272,7 +272,7 @@ namespace fall_core
 
         private string GetFallFilepath()
         {
-            return this.GetLocalFile() + Utils.GetStringConfig("FallFileExtension", ".fall");
+            return this.LocalFile + Utils.GetStringConfig("FallFileExtension", ".fall");
         }
 
         private void DownloadBlock(TaskBlock block)

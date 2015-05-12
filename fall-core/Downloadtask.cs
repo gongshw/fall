@@ -23,11 +23,11 @@ namespace fall_core
         void Destroy();
         bool Running { get; }
         string RemoteURL { get; }
-        string GetLocalFile();
+        string LocalFile { get; }
         long FinishedSize { get; }
         long TotalSize { get; }
         double Speed { get; }
-        DateTime GetAddTime();
+        DateTime AddTime { get; }
     }
 
     public interface TaskListener
@@ -58,13 +58,19 @@ namespace fall_core
             this.addTime = DateTime.Now;
         }
         public String RemoteURL { get { return this._remoteUrl; } }
-        public String GetLocalFile()
+        public String LocalFile
         {
-            return this.localFilePath;
+            get
+            {
+                return this.localFilePath;
+            }
         }
-        public DateTime GetAddTime()
+        public DateTime AddTime
         {
-            return this.addTime;
+            get
+            {
+                return this.addTime;
+            }
         }
         public void BindTaskListener(TaskListener listener)
         {

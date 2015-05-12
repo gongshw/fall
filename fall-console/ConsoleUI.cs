@@ -29,8 +29,8 @@ namespace fall_console
                 clearLine(0);
                 clearLine(1);
                 Console.SetCursorPosition(0, 0);
-                Console.WriteLine("{0} [{1}/{2}] {3:g}", task.GetLocalFile(), Utils.FormatSize(task.FinishedSize),
-                    Utils.FormatSize(task.TotalSize), (DateTime.Now - task.GetAddTime()));
+                Console.WriteLine("{0} [{1}/{2}] {3:g}", task.LocalFile, Utils.FormatSize(task.FinishedSize),
+                    Utils.FormatSize(task.TotalSize), (DateTime.Now - task.AddTime));
                 Console.SetCursorPosition(0, 1);
                 Console.WriteLine("{0:F3}% - {1}/s   ", task.Process * 100, Utils.FormatSize((long)task.Speed));
                 Console.SetCursorPosition(0, consoleTop);

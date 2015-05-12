@@ -26,7 +26,7 @@ namespace fall_gui
                     List<ListViewItem> items = new List<ListViewItem>();
                     foreach (var t in tasks)
                     {
-                        ListViewItem item = new ListViewItem(t.GetLocalFile(), i);
+                        ListViewItem item = new ListViewItem(t.LocalFile, i);
                         item.SubItems.AddRange(new string[] {
                         String.Format("[{0}/{1}]", Utils.FormatSize(t.FinishedSize), Utils.FormatSize(t.TotalSize)), 
                         String.Format("{0}/s",Utils.FormatSize((long)t.Speed)), 
@@ -72,7 +72,7 @@ namespace fall_gui
 
         public void OnDone(DownloadTask task)
         {
-            MessageBox.Show(task.GetLocalFile() + " Done!");
+            MessageBox.Show(task.LocalFile + " Done!");
         }
 
         public void OnProcessUpdate(DownloadTask task)

@@ -50,7 +50,7 @@ namespace fall_console
 
         public void OnDone(DownloadTask task)
         {
-            Console.WriteLine("Job {0} Done!\nMD5: {1}", task.GetLocalFile(), Utils.GetFileMD5(task.GetLocalFile()));
+            Console.WriteLine("Job {0} Done!\nMD5: {1}", task.LocalFile, Utils.GetFileMD5(task.LocalFile));
         }
 
         private object consoleLock = new object();
