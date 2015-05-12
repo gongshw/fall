@@ -16,7 +16,7 @@ namespace fall_gui
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new NewTaskForm());
+            Application.Run(new TaskListForm());
         }
     }
 }

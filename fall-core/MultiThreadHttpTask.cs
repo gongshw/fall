@@ -110,9 +110,12 @@ namespace fall_core
             return "http";
         }
 
-        override public double GetProcess()
+        override public double Process
         {
-            return this.finishedSize / (double)this.blockInfo.totalSize;
+            get
+            {
+                return this.finishedSize / (double)this.blockInfo.totalSize;
+            }
         }
 
         override public void Start()
@@ -177,7 +180,7 @@ namespace fall_core
         private void Init()
         {
             //分析任务大小
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.GetRemoteURL());
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RemoteURL);
             request.AddRange(0);
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             LOG.logMap(response.Headers);
@@ -274,7 +277,7 @@ namespace fall_core
 
         private void DownloadBlock(TaskBlock block)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.GetRemoteURL());
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RemoteURL);
             if (blockInfo.count != 1)
             {
                 request.AddRange(block.offset);
@@ -301,7 +304,7 @@ namespace fall_core
                     {
                         finishedSize += thisRead;
                     }
-                    LOG.log("{0:F5}%", this.GetProcess() * 100);
+                    LOG.log("{0:F5}%", this.Process * 100);
                     this.NotifyProcessUpdate();
                 } while (thisRead != 0);
 

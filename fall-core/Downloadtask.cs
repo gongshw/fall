@@ -14,7 +14,7 @@ namespace fall_core
     public interface DownloadTask
     {
         string GetProtocol();
-        double GetProcess();
+        double Process{get;}
         void Create(string remoteUrl, string localFilePath);
         void BindTaskListener(TaskListener listener);
         void Start();
@@ -22,7 +22,7 @@ namespace fall_core
         void Resume();
         void Destroy();
         bool Running { get; }
-        string GetRemoteURL();
+        string RemoteURL { get; }
         string GetLocalFile();
         long FinishedSize { get; }
         long TotalSize { get; }
@@ -47,20 +47,17 @@ namespace fall_core
     abstract class AbstractDownloadTask : DownloadTask
     {
         private DateTime addTime;
-        private String remoteUrl;
+        private String _remoteUrl;
         private String localFilePath;
         private TaskListener listener = new EmptyTaskListener();
         private SpeedSampler speedSamper = new SpeedSampler();
         public void Create(String remoteUrl, String localFilePath)
         {
-            this.remoteUrl = remoteUrl;
+            this._remoteUrl = remoteUrl;
             this.localFilePath = localFilePath;
             this.addTime = DateTime.Now;
         }
-        public String GetRemoteURL()
-        {
-            return this.remoteUrl;
-        }
+        public String RemoteURL { get { return this._remoteUrl; } }
         public String GetLocalFile()
         {
             return this.localFilePath;
@@ -78,9 +75,9 @@ namespace fall_core
         protected void NotifyProcessUpdate()
         {
             speedSamper.RecordNow(this.FinishedSize);
-            if (this.GetProcess() > lastRecordProcess)
+            if (this.Process > lastRecordProcess)
             {
-                lastRecordProcess = this.GetProcess();
+                lastRecordProcess = this.Process;
                 this.listener.OnProcessUpdate(this);
             }
         }
@@ -95,10 +92,16 @@ namespace fall_core
             this.listener.OnError(this, e);
         }
 
-        public double Speed { get { return speedSamper.getSpeedIn(50000); } }
+        public double Speed
+        {
+            get
+            {
+                return this.Process == 100.0 ? 0 : speedSamper.getSpeedIn(50000);
+            }
+        }
 
         abstract public String GetProtocol();
-        abstract public double GetProcess();
+        abstract public double Process { get; }
         abstract public void Start();
         abstract public void Pause();
         abstract public void Resume();

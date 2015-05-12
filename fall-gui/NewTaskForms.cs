@@ -1,35 +1,31 @@
 ﻿using fall_core;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace fall_gui
 {
-    public partial class NewTaskForm : Form, TaskListener
+    public partial class NewTaskForm : Form
     {
+
+        private DownloadTask _task;
+
+        public DownloadTask DownloadTask { get { return _task; } }
+
         public NewTaskForm()
         {
             InitializeComponent();
         }
 
-        private async void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
             DownloadTaskAnalyzer factory = new DownloadTaskAnalyzer();
             DownloadTask task = factory.create(textBox1.Text, SaveFilePathText.Text);
             if (task != null)
             {
-                task.BindTaskListener(this);
-                await Task.Run(() =>
-                {
-                    task.Start();
-                });
+                this._task = task;
+                this.Close();
             }
             else
             {
@@ -59,22 +55,6 @@ namespace fall_gui
         private void NewTaskForm_Load(object sender, EventArgs e)
         {
             SaveFilePathText.Text = Directory.GetCurrentDirectory() + '\\';
-        }
-
-        public void OnError(DownloadTask task, DownloadError exception)
-        {
-            MessageBox.Show(exception.Message);
-        }
-
-        public void OnDone(DownloadTask task)
-        {
-            MessageBox.Show("done");
-        }
-
-        public void OnProcessUpdate(DownloadTask task)
-        {
-            Action<double> actionDelegate = (x) => { progressBar.Value = (int)x; };
-            progressBar.Invoke(actionDelegate, task.GetProcess() * 100);
         }
     }
 }
