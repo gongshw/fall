@@ -179,36 +179,45 @@ namespace fall_core
             //分析任务大小
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RemoteURL);
             request.AddRange(0);
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            LOG.logMap(response.Headers);
-            blockInfo.totalSize = response.ContentLength;
-            long maxBlockSize = 0;
-            if (!"bytes".Equals(response.Headers.Get("Accept-Ranges"))
-                || !response.StatusCode.Equals(HttpStatusCode.PartialContent))
+            try
             {
-                blockInfo.count = 1;
-                maxBlockSize = blockInfo.totalSize;
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    LOG.logMap(response.Headers);
+                    blockInfo.totalSize = response.ContentLength;
+                    long maxBlockSize = 0;
+                    if (!"bytes".Equals(response.Headers.Get("Accept-Ranges"))
+                        || !response.StatusCode.Equals(HttpStatusCode.PartialContent))
+                    {
+                        blockInfo.count = 1;
+                        maxBlockSize = blockInfo.totalSize;
+                    }
+                    else
+                    {
+                        blockInfo.count = (long)Math.Ceiling(blockInfo.totalSize / (double)this.maxBlockSize);
+                        maxBlockSize = this.maxBlockSize;
+                    }
+                    TaskBlock[] blocks = new TaskBlock[blockInfo.count];
+                    using (fileOutStream = new FileStream(this.LocalFile, FileMode.Create, FileAccess.Write, FileShare.Read))
+                    {
+                        for (int i = 0; i < blocks.Length; i++)
+                        {
+                            blocks[i] = new TaskBlock();
+                            blocks[i].id = i;
+                            blocks[i].done = false;
+                            blocks[i].offset = maxBlockSize * i;
+                            blocks[i].size = (int)((i == blocks.Length - 1) ? (blockInfo.totalSize - blocks[i].offset) : maxBlockSize);
+                            blockQueue.Enqueue(blocks[i]);
+                            fileOutStream.Write(new byte[blocks[i].size], 0, blocks[i].size);
+                            blocks[i].Save(GetFallFilepath(), fallFileLock);
+                        }
+                    }
+                }
             }
-            else
+            catch (WebException e)
             {
-                blockInfo.count = (long)Math.Ceiling(blockInfo.totalSize / (double)this.maxBlockSize);
-                maxBlockSize = this.maxBlockSize;
+                throw new DownloadError("Init task Error", e);
             }
-            TaskBlock[] blocks = new TaskBlock[blockInfo.count];
-            fileOutStream = new FileStream(this.LocalFile, FileMode.Create, FileAccess.Write, FileShare.Read);
-            for (int i = 0; i < blocks.Length; i++)
-            {
-                blocks[i] = new TaskBlock();
-                blocks[i].id = i;
-                blocks[i].done = false;
-                blocks[i].offset = maxBlockSize * i;
-                blocks[i].size = (int)((i == blocks.Length - 1) ? (blockInfo.totalSize - blocks[i].offset) : maxBlockSize);
-                blockQueue.Enqueue(blocks[i]);
-                fileOutStream.Write(new byte[blocks[i].size], 0, blocks[i].size);
-                blocks[i].Save(GetFallFilepath(), fallFileLock);
-            }
-            fileOutStream.Close();
-            response.Close();
         }
 
         private bool TryRestoreBlockInfo()

@@ -10,7 +10,7 @@ namespace fall_core
     public interface DownloadTask
     {
         string GetProtocol();
-        double Process{get;}
+        double Process { get; }
         void Create(string remoteUrl, string localFilePath);
         void BindTaskListener(TaskListener listener);
         void Start();
@@ -139,6 +139,8 @@ namespace fall_core
     public class FileLink
     {
 
+        private static Logger LOG = Logger.get("FileLink");
+
         private string _link;
 
         private string _name;
@@ -147,21 +149,29 @@ namespace fall_core
         {
             this._link = link;
             this._name = Utils.GetFileNameFromUri(link);
-            if (_link.StartsWith("http://") || _link.StartsWith("https://"))
+            if (Utils.ValidateURI(link) && _link.StartsWith("http://") || _link.StartsWith("https://"))
             {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(link);
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                string fileDes = response.Headers.Get("content-disposition");
-                if (null != fileDes)
+                try
                 {
-                    string pattern = @"attachment; filename=(.+)";
-                    MatchCollection matches = Regex.Matches(fileDes, pattern, RegexOptions.IgnoreCase);
-                    if (matches.Count == 1)
+                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                     {
-                        this._name = matches[0].Groups[1].Value;
+                        string fileDes = response.Headers.Get("content-disposition");
+                        if (null != fileDes)
+                        {
+                            string pattern = @"attachment; filename=(.+)";
+                            MatchCollection matches = Regex.Matches(fileDes, pattern, RegexOptions.IgnoreCase);
+                            if (matches.Count == 1)
+                            {
+                                this._name = matches[0].Groups[1].Value;
+                            }
+                        }
                     }
                 }
-                response.Close();
+                catch (WebException exception)
+                {
+                    LOG.log(exception.Message);
+                }
             }
         }
 

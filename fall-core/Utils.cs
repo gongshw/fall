@@ -32,6 +32,12 @@ namespace fall_core
             }
         }
 
+        public static bool ValidateURI(string uriStr)
+        {
+            Uri uri;
+            return Uri.TryCreate(uriStr, UriKind.Absolute, out uri);
+        }
+
         public static string FormatSize(long byteSize)
         {
             string[] sizes = { "B", "KB", "MB", "GB" };
