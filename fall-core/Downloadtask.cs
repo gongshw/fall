@@ -7,6 +7,11 @@ using System.Text.RegularExpressions;
 
 namespace fall_core
 {
+    enum StatusEnum
+    {
+        NEW, INITING, INIT_ERROR, PAUSED, RUNING, DOWNLOAD_ERROR, DONE
+    }
+
     public interface DownloadTask
     {
         string GetProtocol();
@@ -17,6 +22,7 @@ namespace fall_core
         void Pause();
         void Resume();
         void Destroy();
+        StatusEnum Status { get; }
         bool Running { get; }
         string RemoteURL { get; }
         string LocalFile { get; }
